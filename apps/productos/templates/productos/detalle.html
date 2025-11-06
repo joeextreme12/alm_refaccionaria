@@ -537,14 +537,18 @@
                     <button class="quantity-btn" onclick="increaseQuantity()">+</button>
                 </div>
 
-                <button class="btn-add-to-cart" {% if not producto.esta_en_stock %}disabled{% endif %}>
-                    <i class="fas fa-shopping-cart"></i>
-                    {% if producto.esta_en_stock %}
-                    Agregar al Carrito
-                    {% else %}
-                    No Disponible
-                    {% endif %}
-                </button>
+                <form method="post" action="{% url 'carrito:agregar' producto.id %}" style="display: contents;">
+                    {% csrf_token %}
+                    <input type="hidden" name="cantidad" id="cantidadHidden" value="1">
+                    <button type="submit" class="btn-add-to-cart" {% if not producto.esta_en_stock %}disabled{% endif %}>
+                        <i class="fas fa-shopping-cart"></i>
+                        {% if producto.esta_en_stock %}
+                        Agregar al Carrito
+                        {% else %}
+                        No Disponible
+                        {% endif %}
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -611,5 +615,20 @@
         if (this.value < 1) this.value = 1;
         if (this.value > maxStock) this.value = maxStock;
     });
+
+// Sincronizar cantidad con el input hidden
+document.getElementById('quantity').addEventListener('change', function() {
+    document.getElementById('cantidadHidden').value = this.value;
+});
+
+document.querySelectorAll('.quantity-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        setTimeout(() => {
+            document.getElementById('cantidadHidden').value = document.getElementById('quantity').value;
+        }, 100);
+    });
+});
+
+
 </script>
 {% endblock %}

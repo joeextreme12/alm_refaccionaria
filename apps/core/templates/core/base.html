@@ -233,7 +233,16 @@
                 <li><a href="{% url 'core:nosotros' %}" class="nav-link">Nosotros</a></li>
                 <li><a href="{% url 'productos:catalogo' %}" class="nav-link">Productos</a></li>
                 <li><a href="{% url 'core:contacto' %}" class="nav-link">Contacto</a></li>
-                <li><a href="#" class="nav-link"><i class="fas fa-shopping-cart"></i></a></li>
+                <li>
+                    <a href="{% url 'carrito:ver_carrito' %}" class="nav-link" style="position: relative;">
+                        <i class="fas fa-shopping-cart"></i>
+                        {% if carrito|length > 0 %}
+                        <span style="position: absolute; top: -8px; right: -8px; background: #d63031; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                            {{ carrito|length }}
+                        </span>
+                        {% endif %}
+                    </a>
+                </li>
             </ul>
 
             <div class="menu-toggle" id="menuToggle">

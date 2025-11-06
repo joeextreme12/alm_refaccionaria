@@ -44,7 +44,7 @@ class Producto(models.Model):
     # Detalles técnicos
     marca = models.CharField(max_length=100, blank=True)
     modelo = models.CharField(max_length=100, blank=True)
-    codigo_producto = models.CharField(max_length=50, unique=True, blank=True)
+    codigo_producto = models.CharField(max_length=50, unique=True, blank=True, null=True)
     
     # Imágenes
     imagen_principal = models.ImageField(upload_to='productos/', blank=True, null=True)
@@ -70,10 +70,17 @@ class Producto(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.nombre)
-        # Generar código de producto automático si no existe
+        
+        # Si no hay código, guardar primero para obtener el ID
         if not self.codigo_producto:
-            self.codigo_producto = f"ALM-{self.id or 0:05d}"
-        super().save(*args, **kwargs)
+            # Guardar sin código primero
+            super().save(*args, **kwargs)
+            # Generar código basado en el ID
+            self.codigo_producto = f"ALM-{self.id:05d}"
+            # Guardar nuevamente con el código
+            super().save(update_fields=['codigo_producto'])
+        else:
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nombre

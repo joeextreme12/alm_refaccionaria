@@ -92,5 +92,4 @@ class Carrito:
     def obtener_productos(self):
         """Obtener los productos del carrito"""
         productos_ids = self.carrito.keys()
-        return Producto.objects.filter(id__in=productos_ids)# Carrito de compras
-CART_SESSION_ID = 'carrito'
+        return Producto.objects.filter(id__in=productos_ids)

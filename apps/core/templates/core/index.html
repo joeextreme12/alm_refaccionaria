@@ -269,6 +269,55 @@
             font-size: 2rem;
         }
     }
+
+
+    .product-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--primary-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 1;
+}
+
+.product-badge.nuevo {
+    background: #00b894;
+}
+
+.product-badge.descuento {
+    background: #d63031;
+}
+
+.product-card {
+    position: relative;
+}
+
+.product-category {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.product-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.product-card h3 a {
+    color: var(--text-dark);
+    text-decoration: none;
+}
+
+.product-card h3 a:hover {
+    color: var(--primary-color);
+}
+
 </style>
 {% endblock %}
 
@@ -344,50 +393,59 @@
         <div class="underline"></div>
     </div>
     
+    {% if productos_destacados %}
     <div class="products-grid">
+        {% for producto in productos_destacados %}
         <div class="product-card">
-            <div class="product-image">
+            {% if producto.nuevo %}
+            <span class="product-badge nuevo">NUEVO</span>
+            {% elif producto.tiene_descuento %}
+            <span class="product-badge descuento">-{{ producto.porcentaje_descuento }}%</span>
+            {% endif %}
+
+            <a href="{% url 'productos:detalle' producto.slug %}" class="product-image">
+                {% if producto.imagen_principal %}
+                <img src="{{ producto.imagen_principal.url }}" alt="{{ producto.nombre }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
                 <i class="fas fa-cog"></i>
-            </div>
+                {% endif %}
+            </a>
+
             <div class="product-info">
-                <h3>Amortiguadores</h3>
-                <p>Para todo tipo de vehículos</p>
-                <div class="product-price">Desde $899</div>
+                <div class="product-category">{{ producto.categoria.nombre }}</div>
+                <h3><a href="{% url 'productos:detalle' producto.slug %}">{{ producto.nombre }}</a></h3>
+                
+                <div class="product-prices" style="display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0;">
+                    <span class="product-price">${{ producto.precio }}</span>
+                    {% if producto.precio_anterior %}
+                    <span style="font-size: 1rem; color: #999; text-decoration: line-through;">${{ producto.precio_anterior }}</span>
+                    {% endif %}
+                </div>
+
+                <form method="post" action="{% url 'carrito:agregar' producto.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="cantidad" value="1">
+                    <button type="submit" style="width: 100%; padding: 0.8rem; background: var(--primary-color); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;" {% if not producto.esta_en_stock %}disabled{% endif %}>
+                        <i class="fas fa-shopping-cart"></i>
+                        {% if producto.esta_en_stock %}
+                        Agregar al Carrito
+                        {% else %}
+                        Sin Stock
+                        {% endif %}
+                    </button>
+                </form>
             </div>
         </div>
-        
-        <div class="product-card">
-            <div class="product-image">
-                <i class="fas fa-compress-arrows-alt"></i>
-            </div>
-            <div class="product-info">
-                <h3>Resortes</h3>
-                <p>Alta resistencia y durabilidad</p>
-                <div class="product-price">Desde $1,299</div>
-            </div>
-        </div>
-        
-        <div class="product-card">
-            <div class="product-image">
-                <i class="fas fa-circle-notch"></i>
-            </div>
-            <div class="product-info">
-                <h3>Baleros</h3>
-                <p>Precisión alemana</p>
-                <div class="product-price">Desde $449</div>
-            </div>
-        </div>
-        
-        <div class="product-card">
-            <div class="product-image">
-                <i class="fas fa-grip-horizontal"></i>
-            </div>
-            <div class="product-info">
-                <h3>Terminales</h3>
-                <p>Calidad premium</p>
-                <div class="product-price">Desde $349</div>
-            </div>
-        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align: center; color: #999; padding: 2rem;">No hay productos destacados en este momento.</p>
+    {% endif %}
+    
+    <div style="text-align: center; margin-top: 3rem;">
+        <a href="{% url 'productos:catalogo' %}" style="display: inline-block; padding: 1rem 2.5rem; background: var(--primary-color); color: white; text-decoration: none; border-radius: 50px; font-weight: 600; transition: all 0.3s ease;">
+            Ver Todos los Productos <i class="fas fa-arrow-right"></i>
+        </a>
     </div>
 </section>
 
