@@ -1,0 +1,516 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Catálogo de Productos - ALM Refaccionaria{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        padding: 6rem 2rem 4rem;
+        text-align: center;
+        color: white;
+    }
+
+    .page-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .catalog-section {
+        padding: 3rem 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .catalog-layout {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 2rem;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .category-list {
+        list-style: none;
+    }
+
+    .category-item {
+        margin-bottom: 0.8rem;
+    }
+
+    .category-link {
+        display: block;
+        padding: 0.8rem 1rem;
+        color: var(--text-dark);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .category-link:hover,
+    .category-link.active {
+        background: var(--primary-color);
+        color: white;
+        transform: translateX(5px);
+    }
+
+    /* Toolbar */
+    .catalog-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .search-box {
+        display: flex;
+        gap: 0.5rem;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .search-box input {
+        flex: 1;
+        padding: 0.8rem 1rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+
+    .search-box button {
+        padding: 0.8rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .sort-box select {
+        padding: 0.8rem 1rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+    .results-info {
+        color: var(--text-light);
+        font-size: 1rem;
+    }
+
+    /* Products Grid */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .product-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        z-index: 1;
+    }
+
+    .product-badge.nuevo {
+        background: #00b894;
+    }
+
+    .product-badge.descuento {
+        background: #d63031;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-image-placeholder {
+        font-size: 5rem;
+        color: white;
+        opacity: 0.5;
+    }
+
+    .product-info {
+        padding: 1.5rem;
+    }
+
+    .product-category {
+        color: var(--primary-color);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+        color: var(--text-dark);
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .product-title a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .product-title a:hover {
+        color: var(--primary-color);
+    }
+
+    .product-prices {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .product-price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .product-price-old {
+        font-size: 1.2rem;
+        color: var(--text-light);
+        text-decoration: line-through;
+    }
+
+    .product-stock {
+        font-size: 0.9rem;
+        color: #00b894;
+        margin-bottom: 1rem;
+    }
+
+    .product-stock.sin-stock {
+        color: #d63031;
+    }
+
+    .product-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-add-cart {
+        flex: 1;
+        padding: 0.8rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-add-cart:hover {
+        background: var(--accent-color);
+    }
+
+    .btn-view {
+        padding: 0.8rem 1rem;
+        background: white;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-view:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        color: var(--text-light);
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 3rem;
+    }
+
+    .pagination a,
+    .pagination span {
+        padding: 0.8rem 1.2rem;
+        background: white;
+        border: 2px solid #e1e8ed;
+        border-radius: 10px;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .pagination a:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .pagination .current {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+        .catalog-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+            position: relative;
+            top: 0;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+
+        .catalog-toolbar {
+            flex-direction: column;
+        }
+
+        .search-box {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <h1><i class="fas fa-boxes"></i> Catálogo de Productos</h1>
+    <p>Encuentra las mejores refacciones para tu vehículo</p>
+</section>
+
+<!-- Catalog Section -->
+<section class="catalog-section">
+    <div class="catalog-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h3><i class="fas fa-filter"></i> Categorías</h3>
+            <ul class="category-list">
+                <li class="category-item">
+                    <a href="{% url 'productos:catalogo' %}" class="category-link {% if not categoria_actual %}active{% endif %}">
+                        Todas las categorías
+                    </a>
+                </li>
+                {% for categoria in categorias %}
+                <li class="category-item">
+                    <a href="?categoria={{ categoria.slug }}" 
+                       class="category-link {% if categoria_actual == categoria.slug %}active{% endif %}">
+                        {{ categoria.nombre }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="catalog-main">
+            <!-- Toolbar -->
+            <div class="catalog-toolbar">
+                <form method="get" class="search-box">
+                    <input type="text" name="q" placeholder="Buscar productos..." value="{{ query }}">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+
+                <div class="sort-box">
+                    <select onchange="window.location.href='?orden=' + this.value">
+                        <option value="-fecha_creacion">Más recientes</option>
+                        <option value="precio">Precio: Menor a Mayor</option>
+                        <option value="-precio">Precio: Mayor a Menor</option>
+                        <option value="nombre">Nombre: A-Z</option>
+                    </select>
+                </div>
+
+                <div class="results-info">
+                    {{ productos.paginator.count }} producto{{ productos.paginator.count|pluralize }}
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            {% if productos %}
+            <div class="products-grid">
+                {% for producto in productos %}
+                <div class="product-card">
+                    <!-- Badges -->
+                    {% if producto.nuevo %}
+                    <span class="product-badge nuevo">NUEVO</span>
+                    {% elif producto.tiene_descuento %}
+                    <span class="product-badge descuento">-{{ producto.porcentaje_descuento }}%</span>
+                    {% endif %}
+
+                    <!-- Image -->
+                    <div class="product-image">
+                        {% if producto.imagen_principal %}
+                        <img src="{{ producto.imagen_principal.url }}" alt="{{ producto.nombre }}">
+                        {% else %}
+                        <div class="product-image-placeholder">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Info -->
+                    <div class="product-info">
+                        <div class="product-category">{{ producto.categoria.nombre }}</div>
+                        <h3 class="product-title">
+                            <a href="{% url 'productos:detalle' producto.slug %}">{{ producto.nombre }}</a>
+                        </h3>
+
+                        <div class="product-prices">
+                            <span class="product-price">${{ producto.precio }}</span>
+                            {% if producto.precio_anterior %}
+                            <span class="product-price-old">${{ producto.precio_anterior }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="product-stock {% if not producto.esta_en_stock %}sin-stock{% endif %}">
+                            {% if producto.esta_en_stock %}
+                            <i class="fas fa-check-circle"></i> En stock ({{ producto.stock }})
+                            {% else %}
+                            <i class="fas fa-times-circle"></i> Sin stock
+                            {% endif %}
+                        </div>
+
+                        <div class="product-actions">
+                            <button class="btn-add-cart" {% if not producto.esta_en_stock %}disabled{% endif %}>
+                                <i class="fas fa-shopping-cart"></i> Agregar
+                            </button>
+                            <a href="{% url 'productos:detalle' producto.slug %}" class="btn-view">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if productos.has_other_pages %}
+            <div class="pagination">
+                {% if productos.has_previous %}
+                <a href="?page={{ productos.previous_page_number }}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {% endif %}
+
+                {% for num in productos.paginator.page_range %}
+                    {% if productos.number == num %}
+                    <span class="current">{{ num }}</span>
+                    {% else %}
+                    <a href="?page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if productos.has_next %}
+                <a href="?page={{ productos.next_page_number }}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>No se encontraron productos</h3>
+                <p>Intenta con otra búsqueda o categoría</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
