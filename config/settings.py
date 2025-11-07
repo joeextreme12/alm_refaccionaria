@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,6 +45,29 @@ INSTALLED_APPS = [
     'apps.productos',
     'apps.carrito',
 ]
+
+# Jazzmin Admin - Interface mejorada
+JAZZMIN_SETTINGS = {
+    "site_title": "ALM Admin",
+    "site_header": "ALM Refaccionaria",
+    "site_brand": "Panel de Administración",
+    "welcome_sign": "Bienvenido al Panel de Control",
+    "copyright": "ALM Refaccionaria 2025",
+    
+    # Iconos para las apps
+    "icons": {
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "productos.Producto": "fas fa-box",
+        "productos.Categoria": "fas fa-tags",
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "flatly",
+    "navbar": "navbar-orange navbar-dark",
+    "sidebar": "sidebar-dark-warning",
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
